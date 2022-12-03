@@ -30,31 +30,35 @@ CreateThread(function()
             end
             local comboZone = ComboZone:Create(zones, {name = "teleportCombo", debugPoly = location.debug ~= nil and location.debug or false})
             comboZone:onPlayerInOut(function(isPointInside, _, z)
+                local canTeleport = IsPedInAnyVehicle(PlayerPedId(), false) and location.allowVehicles  or not IsPedInAnyVehicle(PlayerPedId(), false)
                 if isPointInside then
                     CurrentLocation = k
                     CurrentZone = z.name
                     CurrentTeleport = teleport.id
-
-                    exports['qb-core']:DrawText(teleport.drawText or location.drawText , teleport.drawTextLocation or location.drawTextLocation)
-                    MenuItemId = exports['qb-radialmenu']:AddOption({
-                        id = 'teleport',
-                        title = teleport.radialTitle or location.radialTitle,
-                        icon = 'door-open',
-                        type = 'client',
-                        event = 'qb-teleport:client:openMenu',
-                        shouldClose = true,
-                        data = {
-                            teleports = location.teleports
-                        }
-                    }, MenuItemId)
+                    if canTeleport then
+                        exports['qb-core']:DrawText(teleport.drawText or location.drawText , teleport.drawTextLocation or location.drawTextLocation)
+                        MenuItemId = exports['qb-radialmenu']:AddOption({
+                            id = 'teleport',
+                            title = teleport.radialTitle or location.radialTitle,
+                            icon = 'door-open',
+                            type = 'client',
+                            event = 'qb-teleport:client:openMenu',
+                            shouldClose = true,
+                            data = {
+                                teleports = location.teleports
+                            }
+                        }, MenuItemId)
+                    end
                 else
-                    exports['qb-core']:HideText()
-                    if MenuItemId ~= nil then
-                        exports['qb-radialmenu']:RemoveOption(MenuItemId)
-                        MenuItemId = nil
-                        CurrentLocation = nil
-                        CurrentTeleport = nil
-                        CurrentZone = nil
+                    if canTeleport then
+                        exports['qb-core']:HideText()
+                        if MenuItemId ~= nil then
+                            exports['qb-radialmenu']:RemoveOption(MenuItemId)
+                            MenuItemId = nil
+                            CurrentLocation = nil
+                            CurrentTeleport = nil
+                            CurrentZone = nil
+                        end
                     end
                 end
             end)
@@ -72,18 +76,19 @@ end)
 
 local function teleportToCoords(location, zoneName)
     local ped = PlayerPedId()
+    local veh = GetVehiclePedIsIn(ped, false)
     DoScreenFadeOut(800)
     while not IsScreenFadedOut() do Wait(0) end
     if location.coords.x == nil then
         for _,coord in pairs(location.coords) do
             if coord.id == zoneName then
-                SetEntityCoords(ped, coord.coords.x, coord.coords.y, coord.coords.z)
-                SetEntityHeading(ped, coord.coords.w)
+                SetEntityCoords(veh and veh or ped, coord.coords.x, coord.coords.y, coord.coords.z)
+                SetEntityHeading(veh and veh or ped, coord.coords.w)
             end
         end
     else
-        SetEntityCoords(ped, location.coords.x, location.coords.y, location.coords.z)
-        SetEntityHeading(ped, location.coords.w)
+        SetEntityCoords(veh and veh or ped, location.coords.x, location.coords.y, location.coords.z)
+        SetEntityHeading(veh and veh or ped, location.coords.w)
     end
     DoScreenFadeIn(800)
     JustTeleported = true
@@ -94,7 +99,6 @@ function TeleportMenu(teleports)
 
     for  i=#teleports,1,-1 do
         local tp = teleports[i]
-        print(tp.coords.z)
         local params = {
             event = "Teleport:Client:Location",
             args = {
@@ -136,7 +140,10 @@ end
 
 RegisterNetEvent('Teleport:Client:Location', function(data)
     if not JustTeleported then
-        TriggerServerEvent('Teleport:Server:ToLocation', CurrentLocation, CurrentTeleport, data.targetLocation, CurrentZone)
+        local canTeleport = IsPedInAnyVehicle(PlayerPedId(), false) and data.targetLocation.allowVehicles  or not IsPedInAnyVehicle(PlayerPedId(), false)
+        if  canTeleport then
+            TriggerServerEvent('Teleport:Server:ToLocation', CurrentLocation, CurrentTeleport, data.targetLocation, CurrentZone)
+        end
     end
 end)
 

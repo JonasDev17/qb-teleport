@@ -8,6 +8,7 @@ Config.Teleports = {
         boxZoneLength = 2,
         header = 'Unknown Location',
         debug = false,
+        allowVehicles = false,
         teleports = {
             [1] = {
                 id="exit",
@@ -78,7 +79,8 @@ Config.Teleports = {
                         coords = vector4(-66.9, -802.48, 43.23, 150.95),
                         range = 2.5,
                         soundfile = "elevator",
-                        soundDistance = 1.0
+                        soundDistance = 1.0,
+                        --allowVehicles = true
                     },
                     [2] = {
                         id = "frontdoor2",
