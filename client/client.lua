@@ -28,7 +28,7 @@ CreateThread(function()
             else
                zones[1] = CreateTeleportBoxZone(teleport.id, teleport.coords, teleport.boxZoneWidth and teleport.boxZoneWidth or location.boxZoneWidth, teleport.boxZoneLength and teleport.boxZoneLength or location.boxZoneLength)
             end
-            local comboZone = ComboZone:Create(zones, {name = "teleportCombo", debugPoly = location.debug ~= nil and location.debug or false})
+            local comboZone = ComboZone:Create(zones, {name = "teleportCombo"})
             comboZone:onPlayerInOut(function(isPointInside, _, z)
                 local canTeleport = IsPedInAnyVehicle(PlayerPedId(), false) and (location.allowVehicles or teleport.allowVehicles)  or not IsPedInAnyVehicle(PlayerPedId(), false)
                 if isPointInside then
