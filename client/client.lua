@@ -4,8 +4,6 @@ CurrentLocation = nil
 CurrentZone = nil
 CurrentTeleport = nil
 
-local QBCore = exports['qb-core']:GetCoreObject()
-
 local function CreateTeleportBoxZone(name, coords, boxWidth, boxLength)
     local pos = vector3(coords.x, coords.y, coords.z)
     return BoxZone:Create(pos, boxWidth and boxWidth or 3, boxLength and boxLength or 3, {
@@ -153,7 +151,6 @@ RegisterNetEvent('Teleport:Client:Location', function(data)
 end)
 
 RegisterNetEvent("Teleport:Client:ToLocation", function(location, zoneName)
-    QBCore.Debug(location)
     teleportToCoords(location, zoneName)
     ResetTeleport()
 end)
