@@ -4,15 +4,17 @@ CurrentLocation = nil
 CurrentZone = nil
 CurrentTeleport = nil
 
+local QBCore = exports['qb-core']:GetCoreObject()
+
 local function CreateTeleportBoxZone(name, coords, boxWidth, boxLength)
     local pos = vector3(coords.x, coords.y, coords.z)
     return BoxZone:Create(pos, boxWidth and boxWidth or 3, boxLength and boxLength or 3, {
         name = name,
         offset = {0.0, 0.0, 0.0},
-        debugPoly = debugPoly,
-        heading = coords.h,
+        debugPoly = Config.DebugPoly,
+        heading = coords.w,
         minZ = pos.z - 1.0,
-        maxZ = pos.z + 3.0,
+        maxZ = pos.z + 4.0,
         coords = pos,
     })
 end
@@ -30,7 +32,7 @@ CreateThread(function()
             end
             local comboZone = ComboZone:Create(zones, {name = "teleportCombo", debugPoly = location.debug ~= nil and location.debug or false})
             comboZone:onPlayerInOut(function(isPointInside, _, z)
-                local canTeleport = IsPedInAnyVehicle(PlayerPedId(), false) and location.allowVehicles  or not IsPedInAnyVehicle(PlayerPedId(), false)
+                local canTeleport = IsPedInAnyVehicle(PlayerPedId(), false) and (location.allowVehicles or teleport.allowVehicles)  or not IsPedInAnyVehicle(PlayerPedId(), false)
                 if isPointInside then
                     CurrentLocation = k
                     CurrentZone = z.name
@@ -79,16 +81,19 @@ local function teleportToCoords(location, zoneName)
     local veh = GetVehiclePedIsIn(ped, false)
     DoScreenFadeOut(800)
     while not IsScreenFadedOut() do Wait(0) end
-    if location.coords.x == nil then
+    local coords = veh ~= 0 and location.vehicleCoords or location.coords
+    if coords.x == nil then
         for _,coord in pairs(location.coords) do
             if coord.id == zoneName then
-                SetEntityCoords(veh and veh or ped, coord.coords.x, coord.coords.y, coord.coords.z)
-                SetEntityHeading(veh and veh or ped, coord.coords.w)
+                SetEntityCoords(veh ~= 0 and veh or ped, coords.coords.x, coord.coords.y, coord.coords.z)
+                SetEntityHeading(veh ~= 0 and veh or ped, coord.coords.w)
             end
         end
     else
-        SetEntityCoords(veh and veh or ped, location.coords.x, location.coords.y, location.coords.z)
-        SetEntityHeading(veh and veh or ped, location.coords.w)
+        SetEntityCoords(veh ~= 0 and veh or ped, coords.x, coords.y, coords.z)
+        if coords.w ~= nil then
+            SetEntityHeading(veh ~= 0 and veh or ped, coords.w)
+        end
     end
     DoScreenFadeIn(800)
     JustTeleported = true
@@ -96,9 +101,9 @@ end
 
 function TeleportMenu(teleports)
     local teleportMenu = {{header = Config.Teleports[CurrentLocation].header, isMenuHeader = true}}
-
     for  i=#teleports,1,-1 do
         local tp = teleports[i]
+        local canTeleport = IsPedInAnyVehicle(PlayerPedId(), false) and teleports[i].allowVehicles  or not IsPedInAnyVehicle(PlayerPedId(), false)
         local params = {
             event = "Teleport:Client:Location",
             args = {
@@ -118,7 +123,7 @@ function TeleportMenu(teleports)
         teleportMenu[#teleportMenu + 1] = {
             header = tp.title,
             txt = "",
-            disabled = tp.id == CurrentTeleport,
+            disabled = tp.id == CurrentTeleport or not canTeleport,
             params = params
         }
     end
@@ -142,12 +147,13 @@ RegisterNetEvent('Teleport:Client:Location', function(data)
     if not JustTeleported then
         local canTeleport = IsPedInAnyVehicle(PlayerPedId(), false) and data.targetLocation.allowVehicles  or not IsPedInAnyVehicle(PlayerPedId(), false)
         if  canTeleport then
-            TriggerServerEvent('Teleport:Server:ToLocation', CurrentLocation, CurrentTeleport, data.targetLocation, CurrentZone)
+            TriggerServerEvent('Teleport:Server:ToLocation', CurrentLocation, CurrentTeleport, data.targetLocation, data.targetLocation.id)
         end
     end
 end)
 
 RegisterNetEvent("Teleport:Client:ToLocation", function(location, zoneName)
+    QBCore.Debug(location)
     teleportToCoords(location, zoneName)
     ResetTeleport()
 end)

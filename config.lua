@@ -1,4 +1,5 @@
 Config = {}
+Config.DebugPoly = false
 Config.Teleports = {
     ['moneylaundering'] = {
         drawText = 'Door',
@@ -70,6 +71,18 @@ Config.Teleports = {
         debug = false,
         teleports = {
             [1] = {
+                id = "underground",
+                title = "Underground",
+                coords = vector4(-84.18, -822.76, 35.03, 343.43),
+                vehCoords = vector4(-84.18, -822.76, 35.03, 343.43),
+                range = 6.0,
+                boxZoneWidth = 8,
+                boxZoneLength = 8,
+                soundfile = "elevator",
+                soundDistance = 1.0,
+                allowVehicles = true,
+            },
+            [2] = {
                 id = "ground",
                 title = "Ground floor",
                 coords = {
@@ -93,9 +106,10 @@ Config.Teleports = {
                 },
                 range = 2.5,
                 soundfile = "elevator",
-                soundDistance = 1.0
+                soundDistance = 1.0,
+                allowVehicles = false,
             },
-            [2] = {
+            [3] = {
                 id = "floor22",
                 title = "Floor 22",
                 coords = vector4(-91.86, -821.20, 221.00, 248.3),
@@ -104,7 +118,7 @@ Config.Teleports = {
                 soundfile = "elevator",
                 soundDistance = 1.0
             },
-            [3] = {
+            [4] = {
                 id = "floor26",
                 title = "Floor 26",
                 coords = vector4(-76.69, -830.38, 242.39, 79.89),
@@ -113,16 +127,20 @@ Config.Teleports = {
                 soundfile = "elevator",
                 soundDistance = 1.0
             },
-            [4] = {
+            [5] = {
                 id = "floor33",
                 title = "Floor 33",
-                coords = vector4(-71.21, -810.36, 284.0, 140.4),
+                coords = vector4(-71.41, -811.22, 284.00, 156.45),
+                vehicleCoords = vector4(-72.50, -814.18, 283.58, 157.41),
+                boxZoneWidth = 10,
+                boxZoneLength = 8,
                 drawText = 'Elevator',
-                range = 2.5,
+                range = 6.0,
                 soundfile = "elevator",
-                soundDistance = 1.0
+                soundDistance = 1.0,
+                allowVehicles = true,
             },
-            [5] = {
+            [6] = {
                 id = "roof",
                 title = "Roof",
                 coords = vector4(-74.98, -824.33, 320.29, 346.57),

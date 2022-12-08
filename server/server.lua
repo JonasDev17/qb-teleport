@@ -40,7 +40,7 @@ RegisterNetEvent('Teleport:Server:ToLocation', function(currenLocationName, curr
         if currentLocation.soundfile then
             TriggerEvent('InteractSound_SV:PlayOnOne', src, currentLocation.soundfile, 0.5)
         end
-        print(targetLocation.coords.z)
+        print(targetLocation.id)
         TriggerClientEvent("Teleport:Client:ToLocation", src, targetLocation, zoneName)
     else
          TriggerClientEvent('QBCore:Notify', src, "The door is locked...", 'error', 5000)
